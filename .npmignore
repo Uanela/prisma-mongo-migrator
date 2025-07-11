@@ -1,0 +1,26 @@
+# Source files
+src/
+tsconfig.json
+tests/
+
+# Development files
+.eslintrc.js
+jest.config.js
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+
+# Environment files
+.env*

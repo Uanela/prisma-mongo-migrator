@@ -1,0 +1,71 @@
+{
+  "name": "prisma-mongo-migrator",
+  "version": "0.3.0",
+  "description": "Migrate and Backfill defaults values in your Prisma just like SQL.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "pmm": "bin/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "prepublishOnly": "pnpm run build",
+    "start": "node dist/cli.js"
+  },
+  "keywords": [
+    "prisma",
+    "json-schema",
+    "mongodb",
+    "backfill",
+    "cli",
+    "database",
+    "schema",
+    "migration",
+    "mongo",
+    "migrator",
+    "migrations",
+    "defaults",
+    "prisma mongodb",
+    "prisma mongo",
+    "database migration",
+    "backfill",
+    "schema update"
+  ],
+  "author": "Uanela Como <uanela.como@formulawebpromax.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uanela/prisma-mongo-migrator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/uanela/prisma-mongo-migrator/issues"
+  },
+  "homepage": "https://github.com/uanela/prisma-mongo-migrator#readme",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "change-case-all": "^2.1.0",
+    "commander": "^11.1.0",
+    "mongodb": "^6.17.0",
+    "pluralize": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.10.0",
+    "@types/pluralize": "^0.0.33",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": ["dist/", "bin/", "README.md", "LICENSE"]
+}
