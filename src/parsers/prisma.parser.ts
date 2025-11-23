@@ -1,14 +1,42 @@
 import { PrismaSchema, PrismaModel, PrismaEnum, PrismaField } from "../types";
 
+/**
+ * A parser for Prisma schema files that extracts models, enums, and their properties.
+ *
+ * @example
+ * ```typescript
+ * const schemaContent = `
+ *   model User {
+ *     id    Int    @id @default(autoincrement())
+ *     email String @unique
+ *   }
+ * `;
+ * const parser = new PrismaSchemaParser(schemaContent);
+ * const schema = parser.parse();
+ * ```
+ */
 export class PrismaSchemaParser {
+  /** The raw Prisma schema content */
   private schema: string;
+  /** Collection of parsed enum definitions */
   private enums: PrismaEnum[] = [];
+  /** Collection of parsed model definitions */
   private models: PrismaModel[] = [];
 
+  /**
+   * Creates a new Prisma schema parser instance.
+   *
+   * @param schemaContent - The raw Prisma schema file content as a string
+   */
   constructor(schemaContent: string) {
     this.schema = schemaContent;
   }
 
+  /**
+   * Parses the Prisma schema and extracts all models and enums.
+   *
+   * @returns The parsed schema containing arrays of models and enums
+   */
   parse(): PrismaSchema {
     this.enums = this.extractEnums();
     this.models = this.extractModels();
@@ -19,6 +47,12 @@ export class PrismaSchemaParser {
     };
   }
 
+  /**
+   * Extracts all enum definitions from the schema.
+   *
+   * @private
+   * @returns Array of parsed enum objects
+   */
   private extractEnums(): PrismaEnum[] {
     const enums: PrismaEnum[] = [];
     const enumBlocks = this.schema.match(/enum\s+\w+\s*\{[^}]*\}/g) || [];
@@ -33,6 +67,13 @@ export class PrismaSchemaParser {
     return enums;
   }
 
+  /**
+   * Parses a single enum block and extracts its name and values.
+   *
+   * @private
+   * @param block - The enum block string (e.g., "enum Status { ACTIVE INACTIVE }")
+   * @returns The parsed enum object or null if parsing fails
+   */
   private parseEnumBlock(block: string): PrismaEnum | null {
     const nameMatch = block.match(/enum\s+(\w+)/);
     if (!nameMatch) return null;
@@ -53,6 +94,12 @@ export class PrismaSchemaParser {
     return { name, values };
   }
 
+  /**
+   * Extracts all model definitions from the schema.
+   *
+   * @private
+   * @returns Array of parsed model objects
+   */
   private extractModels(): PrismaModel[] {
     const models: PrismaModel[] = [];
     const modelBlocks = this.extractModelBlocks();
@@ -67,11 +114,24 @@ export class PrismaSchemaParser {
     return models;
   }
 
+  /**
+   * Extracts raw model block strings from the schema using regex.
+   *
+   * @private
+   * @returns Array of model block strings
+   */
   private extractModelBlocks(): string[] {
     const modelRegex = /model\s+\w+\s*\{[^}]*\}/g;
     return this.schema.match(modelRegex) || [];
   }
 
+  /**
+   * Parses a single model block and extracts its name, fields, and metadata.
+   *
+   * @private
+   * @param block - The model block string
+   * @returns The parsed model object or null if parsing fails
+   */
   private parseModelBlock(block: string): PrismaModel | null {
     const nameMatch = block.match(/model\s+(\w+)/);
     if (!nameMatch) return null;
@@ -86,6 +146,13 @@ export class PrismaSchemaParser {
     return { name, fields, mapName };
   }
 
+  /**
+   * Parses all field definitions within a model block.
+   *
+   * @private
+   * @param block - The model block string containing field definitions
+   * @returns Array of parsed field objects
+   */
   private parseFields(block: string): PrismaField[] {
     const fields: PrismaField[] = [];
     const fieldLines = block
@@ -111,6 +178,28 @@ export class PrismaSchemaParser {
     return fields;
   }
 
+  /**
+   * Parses a single field line and extracts all field properties.
+   *
+   * @private
+   * @param line - A single field definition line (e.g., "id Int @id @default(autoincrement())")
+   * @returns The parsed field object or null if parsing fails
+   *
+   * @example
+   * ```typescript
+   * // Input: "email String? @unique @default("user@example.com")"
+   * // Output: {
+   * //   name: "email",
+   * //   type: "String",
+   * //   isOptional: true,
+   * //   isArray: false,
+   * //   defaultValue: "user@example.com",
+   * //   isId: false,
+   * //   isUnique: true,
+   * //   attributes: ["@unique", "@default(\"user@example.com\")"]
+   * // }
+   * ```
+   */
   private parseFieldLine(line: string): PrismaField | null {
     const fieldMatch = line.match(/^(\w+)\s+(\w+(?:\[\])?)\??\s*(.*)/);
     if (!fieldMatch) return null;
@@ -145,6 +234,23 @@ export class PrismaSchemaParser {
     };
   }
 
+  /**
+   * Parses a default value string and converts it to the appropriate JavaScript type.
+   *
+   * @private
+   * @param defaultStr - The default value string from @default() attribute
+   * @returns The parsed default value in appropriate JavaScript type, or undefined for functions
+   *
+   * @example
+   * ```typescript
+   * parseDefaultValue('"hello"') // returns "hello"
+   * parseDefaultValue('true') // returns true
+   * parseDefaultValue('42') // returns 42
+   * parseDefaultValue('3.14') // returns 3.14
+   * parseDefaultValue('ACTIVE') // returns "ACTIVE" (enum value)
+   * parseDefaultValue('now()') // returns undefined (function)
+   * ```
+   */
   private parseDefaultValue(defaultStr: string): any {
     defaultStr = defaultStr.trim();
 
@@ -179,10 +285,38 @@ export class PrismaSchemaParser {
     return defaultStr;
   }
 
+  /**
+   * Checks if a given type name corresponds to a defined enum.
+   *
+   * @param typeName - The type name to check
+   * @returns True if the type is an enum, false otherwise
+   *
+   * @example
+   * ```typescript
+   * const parser = new PrismaSchemaParser(schemaWithStatusEnum);
+   * parser.parse();
+   * parser.isEnum('Status'); // true
+   * parser.isEnum('String'); // false
+   * ```
+   */
   isEnum(typeName: string): boolean {
     return this.enums.some((e) => e.name === typeName);
   }
 
+  /**
+   * Checks if a given type name corresponds to a defined model.
+   *
+   * @param typeName - The type name to check
+   * @returns True if the type is a model, false otherwise
+   *
+   * @example
+   * ```typescript
+   * const parser = new PrismaSchemaParser(schemaWithUserModel);
+   * parser.parse();
+   * parser.isModel('User'); // true
+   * parser.isModel('String'); // false
+   * ```
+   */
   isModel(typeName: string): boolean {
     return this.models.some((m) => m.name === typeName);
   }

@@ -1,2 +1,25 @@
 #!/usr/bin/env node
-require("../dist/cli.js");
+(async () => {
+  try {
+    const { join } = await import("path");
+    const { existsSync, readFileSync } = await import("fs");
+
+    let useEsm = false;
+
+    try {
+      const pkgPath = join(process.cwd(), "package.json");
+      if (existsSync(pkgPath)) {
+        const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+        useEsm = pkg.type === "module";
+      }
+    } catch (err) {
+      // console.error("Error checking package.json:", err);
+    }
+
+    if (useEsm) await import("../dist/cli.js");
+    else require("../dist/cli.js");
+  } catch (err) {
+    console.error("Failed to load CLI:", err);
+    process.exit(1);
+  }
+})();
