@@ -17,7 +17,7 @@
     }
 
     if (useEsm) await import("../dist/cli.js");
-    else require("../dist/cli.js");
+    else await import("../dist/cli.js");
   } catch (err) {
     console.error("Failed to load CLI:", err);
     process.exit(1);

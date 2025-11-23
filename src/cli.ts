@@ -340,7 +340,7 @@ export class PrismaMongoMigratorCLI {
       options.connection,
       options.database !== "none"
         ? options.database
-        : options.connection.split("/").pop()
+        : options.connection.split("/").pop().split("?")[0]
     );
 
     const modelsToProcess = options.model

@@ -1,5 +1,5 @@
 import { Db, MongoClient } from "mongodb";
-import { plural } from "pluralize";
+import pluralize from "pluralize";
 import chalk from "chalk";
 import { kebabCase } from "change-case-all";
 import { JsonSchema, PrismaModel } from "../types";
@@ -219,10 +219,10 @@ export class MongoBackfillService {
     const attempts = [
       collectionName,
       collectionName.toLowerCase(),
-      plural(collectionName),
-      plural(collectionName.toLowerCase()),
+      pluralize.plural(collectionName),
+      pluralize.plural(collectionName.toLowerCase()),
       kebabCase(collectionName),
-      plural(kebabCase(collectionName)),
+      pluralize.plural(kebabCase(collectionName)),
     ];
 
     // Remove duplicates
